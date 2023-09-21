@@ -1,59 +1,64 @@
 "use client";
-import React, { useState } from "react";
-import PlacesAutocomplete, {
-  geocodeByAddress,
-  getLatLng,
-} from "react-places-autocomplete";
+import usePlacesAutocomplete from "use-places-autocomplete";
 
-interface PostcodeInputProps {
-  onPostcodeSelect: (latLng: { lat: number; lng: number }) => void;
-}
+const PlacesAutocomplete = ({
+  onAddressSelect,
+}: {
+  onAddressSelect?: (address: string) => void;
+}) => {
+  const {
+    ready,
+    value,
+    suggestions: { status, data },
+    setValue,
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    requestOptions: { componentRestrictions: { country: "us" } },
+    debounce: 300,
+    cache: 86400,
+  });
 
-const PostcodeInput: React.FC<PostcodeInputProps> = ({ onPostcodeSelect }) => {
-  const [postcode, setPostcode] = useState<string>("");
+  const renderSuggestions = () => {
+    return data.map((suggestion) => {
+      const {
+        place_id,
+        structured_formatting: { main_text, secondary_text },
+        description,
+      } = suggestion;
 
-  const handleSelect = async (selected: string) => {
-    const results = await geocodeByAddress(selected);
-    const latLng = await getLatLng(results[0]);
-    onPostcodeSelect(latLng);
-    setPostcode(selected);
+      return (
+        <li
+          key={place_id}
+          onClick={() => {
+            setValue(description, false);
+            clearSuggestions();
+            onAddressSelect && onAddressSelect(description);
+          }}
+          className="cursor-pointer bg-gray-200 p-2"
+        >
+          <strong>{main_text}</strong> <small>{secondary_text}</small>
+        </li>
+      );
+    });
   };
 
   return (
-    <div>
-      <PlacesAutocomplete
-        value={postcode}
-        onChange={setPostcode}
-        onSelect={handleSelect}
-      >
-        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-          <div className="relative">
-            <input
-              {...getInputProps({ placeholder: "Enter postcode" })}
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-400"
-            />
-            <div className="absolute z-10 w-full mt-2 bg-white border border-gray-300 rounded-lg">
-              {loading ? <div>Loading...</div> : null}
-              {suggestions.map((suggestion) => {
-                const style = {
-                  backgroundColor: suggestion.active ? "#41b6e6" : "#fff",
-                };
-                return (
-                  <div
-                    key={suggestion.placeId}
-                    {...getSuggestionItemProps(suggestion, { style })}
-                    className="p-2 cursor-pointer hover:bg-gray-200"
-                  >
-                    {suggestion.description}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </PlacesAutocomplete>
+    <div className="w-96">
+      <input
+        value={value}
+        className="w-full p-2 border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring focus:border-blue-400"
+        disabled={!ready}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="123 Stariway To Heaven"
+      />
+
+      {status === "OK" && (
+        <ul className="absolute w-96 z-10 mt-2 bg-white border border-gray-300 rounded-lg">
+          {renderSuggestions()}
+        </ul>
+      )}
     </div>
   );
 };
 
-export default PostcodeInput;
+export default PlacesAutocomplete;
