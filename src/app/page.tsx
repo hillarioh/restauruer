@@ -20,7 +20,7 @@ export default function Home() {
   );
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBmf2ur5AF9cvKabEdPy729uv51Ke9qRHY",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY as string,
     libraries: libraries as any,
   });
 
