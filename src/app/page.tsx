@@ -3,10 +3,12 @@ import { useMemo, useState } from "react";
 import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api";
 import PlacesAutocomplete from "@/components/PostCodeInput";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
+import { getRestaurants } from "@/utils/fetch";
 
 export default function Home() {
   const [lat, setLat] = useState(27.672932021393862);
   const [lng, setLng] = useState(85.31184012689732);
+  const [restaurants, setRestaurants] = useState([]);
   const libraries = useMemo(() => ["places"], []);
   const mapCenter = useMemo(() => ({ lat: lat, lng: lng }), [lat, lng]);
 
@@ -18,6 +20,21 @@ export default function Home() {
     }),
     []
   );
+
+  const restaurantList = async () => {
+    try {
+      const response = await getRestaurants(lat, lng);
+
+      const results = response.businesses.map((biz: any) => ({
+        lat: biz.coordinates.latitude,
+        lng: biz.coordinates.longitude,
+      }));
+
+      setRestaurants(results);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY as string,
@@ -39,9 +56,9 @@ export default function Home() {
           onAddressSelect={(address) => {
             getGeocode({ address: address }).then((results) => {
               const { lat, lng } = getLatLng(results[0]);
-
               setLat(lat);
               setLng(lng);
+              restaurantList();
             });
           }}
         />
@@ -60,6 +77,15 @@ export default function Home() {
             position={mapCenter}
             onLoad={() => console.log("Marker Loaded")}
           />
+          {restaurants.length > 0 &&
+            restaurants.map((res) => {
+              return (
+                <MarkerF
+                  position={res}
+                  onLoad={() => console.log("Marker Loaded")}
+                />
+              );
+            })}
         </GoogleMap>
       </div>
     </main>
