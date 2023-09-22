@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useLoadScript,
   GoogleMap,
@@ -41,6 +41,10 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    restaurantList();
+  }, [lng]);
+
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY as string,
     libraries: libraries as any,
@@ -65,7 +69,6 @@ export default function Home() {
                 console.log(lat, lng);
                 setLat(lat);
                 setLng(lng);
-                restaurantList();
               });
             }}
           />
