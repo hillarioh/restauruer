@@ -52,7 +52,7 @@ export default function Home() {
   });
 
   if (!isLoaded) {
-    return <p>Loading...</p>;
+    return <p>Loading.....</p>;
   }
 
   return (
