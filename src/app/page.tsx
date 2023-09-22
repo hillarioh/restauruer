@@ -78,9 +78,10 @@ export default function Home() {
             onLoad={() => console.log("Marker Loaded")}
           />
           {restaurants.length > 0 &&
-            restaurants.map((res) => {
+            restaurants.map((res, i) => {
               return (
                 <MarkerF
+                  key={i}
                   position={res}
                   onLoad={() => console.log("Marker Loaded")}
                 />
