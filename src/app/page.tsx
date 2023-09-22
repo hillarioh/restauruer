@@ -11,8 +11,8 @@ import { getGeocode, getLatLng } from "use-places-autocomplete";
 import axios from "axios";
 
 export default function Home() {
-  const [lat, setLat] = useState(27.672932021393862);
-  const [lng, setLng] = useState(85.31184012689732);
+  const [lat, setLat] = useState(40.7094756);
+  const [lng, setLng] = useState(-74.0072955);
   const [restaurants, setRestaurants] = useState([]);
   const libraries = useMemo(() => ["places"], []);
   const mapCenter = useMemo(() => ({ lat: lat, lng: lng }), [lat, lng]);
@@ -22,6 +22,7 @@ export default function Home() {
       disableDefaultUI: true,
       clickableIcons: true,
       scrollwheel: false,
+      zoom: 12,
     }),
     []
   );
@@ -55,12 +56,12 @@ export default function Home() {
   }
 
   return (
-    <main className="flex bg-white min-h-screen flex-col items-center justify-between p-24">
-      <h1 className="text-3xl font-semibold mb-4 text-black">
+    <main className=" bg-white min-h-screen  p-4 pt-16 md:p-16">
+      <h1 className="text-3xl text-center font-semibold mb-4 text-black">
         Restaurant Finder
       </h1>
 
-      <div className="mb-4 flex items-center">
+      <div className="mb-4 flex flex-col justify-center md:flex-row items-center">
         <div>
           <PlacesAutocomplete
             onAddressSelect={(address) => {
@@ -73,12 +74,12 @@ export default function Home() {
             }}
           />
         </div>
-        <div className="text-gray-800 px-4">
+        <div className="text-gray-800 px-4 mt-3 mb:mt-0 font-medium">
           Restaurants: {restaurants.length}
         </div>
       </div>
 
-      <div className="w-3/4 h-96">
+      <div className="w-screen90 md:screen80 h-screen70">
         <GoogleMap
           options={mapOptions}
           zoom={14}
@@ -87,7 +88,7 @@ export default function Home() {
           mapContainerStyle={{ width: "100%", height: "100%" }}
           onLoad={() => console.log("Map Component Loaded...")}
         >
-          <MarkerF
+          <Marker
             position={mapCenter}
             onLoad={() => console.log("Marker Loaded")}
           />
