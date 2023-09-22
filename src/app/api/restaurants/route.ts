@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
     const { lat, lng } = body;
-
     const yelp_key = process.env.YELP_API_KEY;
 
     if (!yelp_key) {
@@ -14,20 +12,23 @@ export async function POST(req: Request) {
     }
 
     const base_url = "https://api.yelp.com/v3/businesses/search";
-    const miles = "8046.72";
+    const miles = "8047";
 
-    let headers = {
+    const headers = {
       Authorization: `Bearer ${process.env.YELP_API_KEY}`,
       "Content-Type": "application/json",
     };
 
-    let url = `${base_url}?latitude=${lat}&longitude=${lng}&radius=${miles}&categories=restaurants&sort_by=best_match&limit=10`;
-    const response = axios.get(url, { headers }).then((res) => res.data);
-    console.log(response);
+    const url = `${base_url}?latitude=${lat}&longitude=${lng}&radius=${miles}&categories=restaurants&sort_by=best_match&limit=10`;
 
-    return NextResponse.json(response);
+    const res = await fetch(url, {
+      headers,
+    });
+    const product = await res.json();
+
+    return NextResponse.json(product);
   } catch (error) {
-    console.log("[RESTAURANT_GET]", error);
+    console.error("[RESTAURANT_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

@@ -1,9 +1,14 @@
 "use client";
 import { useMemo, useState } from "react";
-import { useLoadScript, GoogleMap, MarkerF } from "@react-google-maps/api";
+import {
+  useLoadScript,
+  GoogleMap,
+  MarkerF,
+  Marker,
+} from "@react-google-maps/api";
 import PlacesAutocomplete from "@/components/PostCodeInput";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
-import { getRestaurants } from "@/utils/fetch";
+import axios from "axios";
 
 export default function Home() {
   const [lat, setLat] = useState(27.672932021393862);
@@ -23,13 +28,13 @@ export default function Home() {
 
   const restaurantList = async () => {
     try {
-      const response = await getRestaurants(lat, lng);
-
-      const results = response.businesses.map((biz: any) => ({
+      const response = await axios.post("/api/restaurants", { lat, lng });
+      const results = response.data.businesses.map((biz: any) => ({
         lat: biz.coordinates.latitude,
         lng: biz.coordinates.longitude,
       }));
 
+      console.log(response.data);
       setRestaurants(results);
     } catch (error) {
       console.log(error);
@@ -51,17 +56,23 @@ export default function Home() {
         Restaurant Finder
       </h1>
 
-      <div className="mb-4">
-        <PlacesAutocomplete
-          onAddressSelect={(address) => {
-            getGeocode({ address: address }).then((results) => {
-              const { lat, lng } = getLatLng(results[0]);
-              setLat(lat);
-              setLng(lng);
-              restaurantList();
-            });
-          }}
-        />
+      <div className="mb-4 flex items-center">
+        <div>
+          <PlacesAutocomplete
+            onAddressSelect={(address) => {
+              getGeocode({ address: address }).then((results) => {
+                const { lat, lng } = getLatLng(results[0]);
+                console.log(lat, lng);
+                setLat(lat);
+                setLng(lng);
+                restaurantList();
+              });
+            }}
+          />
+        </div>
+        <div className="text-gray-800 px-4">
+          Restaurants: {restaurants.length}
+        </div>
       </div>
 
       <div className="w-3/4 h-96">
@@ -77,16 +88,19 @@ export default function Home() {
             position={mapCenter}
             onLoad={() => console.log("Marker Loaded")}
           />
-          {restaurants.length > 0 &&
-            restaurants.map((res, i) => {
-              return (
-                <MarkerF
-                  key={i}
-                  position={res}
-                  onLoad={() => console.log("Marker Loaded")}
-                />
-              );
-            })}
+          {restaurants.length > 0 ? (
+            <>
+              {restaurants.map((res, i) => {
+                return (
+                  <MarkerF
+                    key={i}
+                    position={res}
+                    onLoad={() => console.log("Marker Loaded")}
+                  />
+                );
+              })}
+            </>
+          ) : null}
         </GoogleMap>
       </div>
     </main>
