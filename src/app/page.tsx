@@ -67,8 +67,7 @@ export default function Home() {
             onAddressSelect={(address) => {
               getGeocode({ address: address }).then((results) => {
                 const { lat, lng } = getLatLng(results[0]);
-                console.log(lat, lng);
-                setLat(lat);
+                // setLat(lat);
                 setLng(lng);
               });
             }}
